@@ -1,0 +1,14 @@
+# --- PyTorch ---
+# Install the CUDA build that matches YOUR GPU, then this file for the rest.
+# RTX 5090 / Blackwell (sm_120) needs the cu128 wheels:
+#   pip install --upgrade "torch>=2.7" --index-url https://download.pytorch.org/whl/cu128
+torch>=2.7
+
+# --- Model loading + quantization ---
+transformers>=4.44
+accelerate>=0.33
+bitsandbytes>=0.43   # 4-bit / 8-bit quantization (Lab B)
+
+# --- Notebook environment ---
+jupyterlab>=4.0
+ipywidgets>=8.0
