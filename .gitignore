@@ -20,3 +20,6 @@ hf_cache/
 # OS
 .DS_Store
 Thumbs.db
+
+# Arena runtime leaderboard
+arena_leaderboard.json
