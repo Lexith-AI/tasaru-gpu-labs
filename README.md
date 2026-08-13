@@ -19,6 +19,7 @@ The path goes from a single GPU to a datacenter: **read** the hardware, **progra
 | [`03_fast_training/`](03_fast_training) | Fast **PyTorch training** on one GPU — mixed precision, `torch.compile`, data pipelines, finding bottlenecks |
 | [`04_multi_gpu/`](04_multi_gpu) | **DDP · FSDP · NCCL**, tensor-parallel from scratch, the **3D-parallelism** planning exercise, the cluster flowchart, and a one-click **Kaggle (2× T4)** notebook |
 | [`05_challenge/`](05_challenge) | The **3D Parallelism Arena** — a live, auto-scored Gradio leaderboard — plus the full *Scale Out* assignment |
+| [`06_finetuning/`](06_finetuning) | Real **SFT fine-tuning** that scales with 🤗 Accelerate — **LoRA (DDP)** or **full fine-tune (FSDP)**, one script, launch-time parallelism |
 
 ---
 

@@ -1,0 +1,20 @@
+# Accelerate FSDP config for FULL fine-tuning (shards params + grads + optimizer).
+#   accelerate launch --config_file fsdp_config.yaml finetune.py --full_finetune
+#
+# Change num_processes to your GPU count, and fsdp_transformer_layer_cls_to_wrap
+# to your model's decoder block:
+#   Qwen2.5 → Qwen2DecoderLayer   ·   Llama-3 → LlamaDecoderLayer   ·   Mistral → MistralDecoderLayer
+compute_environment: LOCAL_MACHINE
+distributed_type: FSDP
+mixed_precision: bf16          # use fp16 on T4 (no BF16)
+num_processes: 2
+use_cpu: false
+fsdp_config:
+  fsdp_sharding_strategy: FULL_SHARD          # ZeRO-3: shard params, grads, optimizer
+  fsdp_auto_wrap_policy: TRANSFORMER_BASED_WRAP
+  fsdp_transformer_layer_cls_to_wrap: Qwen2DecoderLayer
+  fsdp_state_dict_type: FULL_STATE_DICT       # gather a whole-model checkpoint when saving
+  fsdp_backward_prefetch: BACKWARD_PRE
+  fsdp_use_orig_params: true
+  fsdp_cpu_ram_efficient_loading: true
+  fsdp_offload_params: false                  # set true to also offload to CPU RAM (slower, fits more)
