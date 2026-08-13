@@ -49,7 +49,7 @@ For **each** scenario below, produce a **parallelism plan**: choose the degrees,
 2. **MoE 600B, 8 experts active · 128 GPUs** (16 nodes × 8 · 80 GB). → now you also need **EP** — where does the expert all-to-all go?
 3. **Dense 13B, but a 1M-token context · 16 GPUs** (2 nodes × 8 · 80 GB). → now you also need **CP** — why won't TP/PP alone solve this?
 
-For each: **the plan · the memory math · the mapping · which collective each axis creates** (TP→all-reduce, EP→all-to-all, PP→point-to-point, DP→gradient all-reduce, CP→exchange K/V). More than one answer can be valid — **justify** it against memory + interconnect.
+For each: **the plan · the memory math · the mapping · which collective each axis creates**. More than one answer can be valid — **justify** it against memory + interconnect.
 
 ---
 
