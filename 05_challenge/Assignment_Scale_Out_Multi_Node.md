@@ -119,11 +119,6 @@ The competitive finale — **this one is individual.** Each student submits a **
 | — | **Write-up quality** — clear, correct, well-reasoned explanations across all parts | 10 |
 | — | **Bonus** — a real multi-node run (RunPod) or a Docker/`kind` multi-node simulation, documented | +10 |
 
-## Bonus · see multi-node for real (optional, +10)
-Pick one:
-- **RunPod:** spin up a real **2-node** box and run `train_ddp.py` with `--nnodes=2`; report the cross-node scaling.
-- **Simulate it:** a `docker compose` mini-Slurm cluster *or* `kind` (Kubernetes-in-Docker) with 2 workers; launch a `torchrun --nnodes=2` job and show ranks 0–15 spanning two "nodes."
-
 ## Resources you already have
 - **Multi-GPU labs** — `train_ddp.py` · `train_fsdp.py` · `bench_nccl.py` · `tp_from_scratch.py` · `EXERCISE_plan_the_parallelism.md`
 - **The Cluster flowchart** — `Cluster_Training_Loop_Flowchart.pdf`
