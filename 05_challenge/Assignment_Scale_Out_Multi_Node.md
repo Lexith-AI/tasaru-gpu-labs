@@ -49,7 +49,7 @@ For **each** scenario below, produce a **parallelism plan**: choose the degrees,
 2. **MoE 600B, 8 experts active · 128 GPUs** (16 nodes × 8 · 80 GB). → now you also need **EP** — where does the expert all-to-all go?
 3. **Dense 13B, but a 1M-token context · 16 GPUs** (2 nodes × 8 · 80 GB). → now you also need **CP** — why won't TP/PP alone solve this?
 
-For each: **the plan · the memory math · the mapping · which collective each axis creates**. More than one answer can be valid — **justify** it against memory + interconnect.
+For each: **the plan · the memory math · the mapping · which collective each axis creates** (TP→all-reduce, EP→all-to-all, PP→point-to-point, DP→gradient all-reduce, CP→exchange K/V). More than one answer can be valid — **justify** it against memory + interconnect.
 
 ---
 
@@ -99,6 +99,26 @@ The competitive finale — **this one is individual.** Each student submits a **
 
 **You get only 3 submissions**, and the ranking rewards *understanding, not clicking*: you're ranked by your **best MFU**, and **ties are broken by fewest attempts** — so do the memory math and reason it out *before* you submit. There's a sweet spot: *enough* TP + PP to fit, but not so much that comm and the bubble eat your throughput; the rest goes to **DP**. Write down the plan you settled on and *why* — that reasoning is the graded part; the ranking is glory.
 
+### How the score (MFU) is calculated
+
+A plan that is **valid** (`TP × PP × DP = 128`, `TP ≤ 8`) and **fits** (≤ 80 GB/GPU) is scored by its **Model-FLOPs Utilization** — the share of compute doing useful work instead of being lost to communication and pipeline idle time. Anything invalid or OOM scores **0**.
+
+```
+MFU = 1 / (1 + tp_overhead + pipeline_bubble + dp_overhead)      → shown as a %
+```
+
+| Term | Formula | Why |
+|---|---|---|
+| **TP overhead** | `0.03 × (TP − 1) × link_penalty` | TP all-reduces **every layer**. `link_penalty = 1` inside a node (NVLink), but **18×** if `TP > 8` (crosses to InfiniBand) |
+| **Pipeline bubble** | `(PP − 1) / ((PP − 1) + 16)` | pipeline idle time — grows with PP, shrinks as micro-batches (the `16`) rise |
+| **DP overhead** | `0.01 × log₂(DP)` | one gradient all-reduce **per step** → nearly free |
+
+**Worked example — TP8 · PP4 · DP4:** `0.03×7 = 0.21` + `3/19 = 0.158` + `0.01×log₂4 = 0.02` → MFU = `1 / 1.388` = **72.1%**.
+
+**The memory gate (checked first):** `model_state = params × bytes/param` (16 for BF16, 12 for FP8); per-GPU = `model_state ÷ (TP×PP)` + activations `0.8 × layers/PP × (0.35 if checkpointing)`; the total must be ≤ 80 GB or the plan is invalid.
+
+> It's a **simplified teaching model**: it rewards the right decisions — TP inside NVLink, just enough PP to fit, the rest in DP — not exact wall-clock numbers.
+
 ---
 
 ## Deliverables
@@ -118,6 +138,11 @@ The competitive finale — **this one is individual.** Each student submits a **
 | 5 | **Arena** — your best plan + the reasoning behind it (ranking = glory) | 10 |
 | — | **Write-up quality** — clear, correct, well-reasoned explanations across all parts | 10 |
 | — | **Bonus** — a real multi-node run (RunPod) or a Docker/`kind` multi-node simulation, documented | +10 |
+
+## Bonus · see multi-node for real (optional, +10)
+Pick one:
+- **RunPod:** spin up a real **2-node** box and run `train_ddp.py` with `--nnodes=2`; report the cross-node scaling.
+- **Simulate it:** a `docker compose` mini-Slurm cluster *or* `kind` (Kubernetes-in-Docker) with 2 workers; launch a `torchrun --nnodes=2` job and show ranks 0–15 spanning two "nodes."
 
 ## Resources you already have
 - **Multi-GPU labs** — `train_ddp.py` · `train_fsdp.py` · `bench_nccl.py` · `tp_from_scratch.py` · `EXERCISE_plan_the_parallelism.md`
